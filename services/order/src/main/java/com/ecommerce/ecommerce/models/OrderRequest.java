@@ -16,11 +16,10 @@ public record OrderRequest(
         @NotNull(message = "Payment method should be precised")
         PaymentMethod paymentMethod,
         @NotNull(message = "Customer should be precised")
-        @NotEmpty(message = "Customer should be precised")
-        @NotBlank(message = "Customer should be precised")
-        String customerId,
+        @Positive(message = "Customer id should be positive")
+        Integer customerId,
         @NotEmpty(message = "You should at least purchase one product")
-        List<PurchaseRequest> products
+        List<ProductPurchaseRequest> products
 
 ) {
 }

@@ -26,7 +26,7 @@ public class Order {
     private BigDecimal totalAmount;
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
-    private String customerId;
+    private Integer customerId;
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines;
     @CreatedDate
