@@ -1,6 +1,7 @@
 package com.ecommerce.ecommerce.services;
 
 import com.ecommerce.ecommerce.clients.CustomerClient;
+import com.ecommerce.ecommerce.clients.PaymentClient;
 import com.ecommerce.ecommerce.clients.ProductClient;
 import com.ecommerce.ecommerce.exceptions.BusinessException;
 import com.ecommerce.ecommerce.kafka.OrderConfirmation;
@@ -25,15 +26,17 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
 
-@Autowired
-    public OrderService(CustomerClient customerClient, ProductClient productClient, OrderRepository orderRepository, OrderMapper mapper, OrderLineService orderLineService, OrderProducer orderProducer) {
+    @Autowired
+    public OrderService(CustomerClient customerClient, ProductClient productClient, OrderRepository orderRepository, OrderMapper mapper, OrderLineService orderLineService, OrderProducer orderProducer, PaymentClient paymentClient) {
         this.customerClient = customerClient;
         this.productClient = productClient;
         this.orderRepository = orderRepository;
         this.mapper = mapper;
         this.orderLineService = orderLineService;
         this.orderProducer = orderProducer;
+        this.paymentClient = paymentClient;
     }
 
     public Integer createOrder(OrderRequest request) {
@@ -54,6 +57,16 @@ public class OrderService {
                     )
             );
         }
+
+        var paymentRequest=new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                order.getId(),
+                order.getReference(),
+                customer
+        );
+
+        paymentClient.requestOrderPayment(paymentRequest);
 
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
